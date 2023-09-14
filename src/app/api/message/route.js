@@ -5,36 +5,58 @@ import { NextResponse } from "next/server";
 
 export const GET = async (request) => {
   readDB();
+  const roomId = request.nextUrl.searchParams.get("roomId");
+  if(!roomId){
+    return NextResponse.json(
+        {
+          ok: false,
+          message: `Room is not found`,
+        },
+        { status: 404 }
+      );
+  };
+  if(roomId){
+    const roomIdList = [];
+    for (const TheRoom of DB.messages){
+      if(TheRoom.roomId === roomId){
+        roomIdList.push(TheRoom.roomId)
+      }
+    }
 
-  // return NextResponse.json(
-  //   {
-  //     ok: false,
-  //     message: `Room is not found`,
-  //   },
-  //   { status: 404 }
-  // );
+  //   const messageIdList = [];
+  //   for (const message of DB.messages){
+  //     if(message.roomId === roomId){
+  //       messageIdList.push(message.roomId)
+  //     }
+  //   }
+  // }
 };
 
 export const POST = async (request) => {
+  const body = await request.json();
+  const roomId = body;
+  const foundRoom = DB.messages.find((x) => x.roomId === roomId);
   readDB();
-
-  // return NextResponse.json(
-  //   {
-  //     ok: false,
-  //     message: `Room is not found`,
-  //   },
-  //   { status: 404 }
-  // );
+  if(!foundRoom){
+    return NextResponse.json(
+      {
+        ok: false,
+        message: `Room is not found`,
+      },
+      { status: 404 }
+    );
+  }
 
   const messageId = nanoid();
 
   writeDB();
-
-  return NextResponse.json({
-    ok: true,
-    // messageId,
-    message: "Message has been sent",
-  });
+  if(foundRoom){
+    return NextResponse.json({
+      ok: true,
+      messageId,
+      message: "Message has been sent",
+    });
+  }
 };
 
 export const DELETE = async (request) => {
